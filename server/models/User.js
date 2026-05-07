@@ -45,6 +45,16 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: 'Delhi',
   },
+  bio: {
+    type: String,
+  },
+  hourlyRate: {
+    type: Number,
+  },
+  availability: {
+    type: [String],
+    default: [],
+  },
   rating: {
     type: Number,
     default: 0,

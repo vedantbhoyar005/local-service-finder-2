@@ -89,6 +89,10 @@ router.get('/me', protect, async (req, res) => {
       service: user.service,
       experience: user.experience,
       skills: user.skills,
+      city: user.city,
+      bio: user.bio,
+      hourlyRate: user.hourlyRate,
+      availability: user.availability,
       phone: user.phone,
       avatar: user.avatar
     });
@@ -111,6 +115,10 @@ router.put('/profile', protect, async (req, res) => {
       user.service = req.body.service || user.service;
       user.experience = req.body.experience || user.experience;
       user.skills = req.body.skills || user.skills;
+      user.city = req.body.city || user.city;
+      if (req.body.bio !== undefined) user.bio = req.body.bio;
+      if (req.body.hourlyRate !== undefined) user.hourlyRate = req.body.hourlyRate;
+      if (req.body.availability !== undefined) user.availability = req.body.availability;
       
       if (req.body.password) {
         user.password = req.body.password;
@@ -126,6 +134,10 @@ router.put('/profile', protect, async (req, res) => {
         service: updatedUser.service,
         experience: updatedUser.experience,
         skills: updatedUser.skills,
+        city: updatedUser.city,
+        bio: updatedUser.bio,
+        hourlyRate: updatedUser.hourlyRate,
+        availability: updatedUser.availability,
         phone: updatedUser.phone,
         avatar: updatedUser.avatar,
         token: generateToken(updatedUser._id),

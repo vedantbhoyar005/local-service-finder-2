@@ -11,6 +11,10 @@ interface User {
   service?: string;
   experience?: string;
   skills?: string[];
+  city?: string;
+  bio?: string;
+  hourlyRate?: number;
+  availability?: string[];
 }
 
 interface AuthContextType {
@@ -76,6 +80,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         service: data.service,
         experience: data.experience,
         skills: data.skills,
+        city: data.city,
+        bio: data.bio,
+        hourlyRate: data.hourlyRate,
+        availability: data.availability,
         phone: data.phone,
         avatar: data.avatar
       });
@@ -108,6 +116,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         service: data.service,
         experience: data.experience,
         skills: data.skills,
+        city: data.city,
+        bio: data.bio,
+        hourlyRate: data.hourlyRate,
+        availability: data.availability,
         phone: data.phone,
         avatar: data.avatar
       });

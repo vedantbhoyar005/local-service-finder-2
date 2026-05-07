@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { useAuth } from "@/hooks/useAuth";
-import { User, Mail, Shield, CheckCircle2, Star, Calendar, ArrowRight, Phone, Wrench, X, Plus, Loader2 } from "lucide-react";
+import { User, Mail, Shield, CheckCircle2, Star, Calendar, ArrowRight, Phone, Wrench, X, Plus, Loader2, MapPin, Briefcase, IndianRupee, FileText, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { serviceCategories } from "@/data/services";
 import { toast } from "sonner";
 
 const WorkerPrivateProfile = () => {
@@ -11,9 +13,23 @@ const WorkerPrivateProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   
+  // Predefined options
+  const cities = ["Delhi", "Mumbai", "Bangalore", "Pune", "Chennai", "Kolkata", "Hyderabad"];
+  const commonSkills = [
+    "AC Gas", "AC Repair", "Bike Repair", "Cabinets", "Car Service", "Carpet", "Deep Cleaning", 
+    "Doors", "Drainage", "Exterior", "Fan Installation", "Furniture", "Interior", "Inverter", 
+    "Kitchen", "LED", "Leak Repair", "Pipe Fitting", "Pipe Laying", "Switchboard", "Tap Repair", 
+    "Texture", "Water Tank", "Wiring"
+  ];
+
   // Form states
   const [name, setName] = useState(user?.name || "");
   const [phone, setPhone] = useState(user?.phone || "");
+  const [city, setCity] = useState(user?.city || "Delhi");
+  const [service, setService] = useState(user?.service || "");
+  const [experience, setExperience] = useState(user?.experience || "");
+  const [hourlyRate, setHourlyRate] = useState(user?.hourlyRate?.toString() || "");
+  const [availability, setAvailability] = useState<string[]>(user?.availability || []);
   const [skills, setSkills] = useState<string[]>(user?.skills || []);
   const [newSkill, setNewSkill] = useState("");
 
@@ -31,7 +47,10 @@ const WorkerPrivateProfile = () => {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      await updateUserProfile({ name, phone, skills });
+      await updateUserProfile({ 
+        name, phone, skills, city, service, experience, availability, 
+        hourlyRate: hourlyRate ? Number(hourlyRate) : undefined 
+      });
       setIsEditing(false);
     } catch (error) {
       console.error(error);
@@ -116,23 +135,96 @@ const WorkerPrivateProfile = () => {
                   )}
                 </div>
               </div>
+
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center text-primary">
+                  <MapPin className="w-5 h-5" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase">Location / City</p>
+                  {isEditing ? (
+                    <select
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      className="w-full h-8 mt-1 rounded-md border border-input bg-background px-3 py-1 text-sm font-bold"
+                    >
+                      {cities.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  ) : (
+                    <p className="font-bold text-sm">{user?.city || "Not provided"}</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center text-primary">
+                  <Settings className="w-5 h-5" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase">Service Type</p>
+                  {isEditing ? (
+                    <select
+                      value={service}
+                      onChange={(e) => setService(e.target.value)}
+                      className="w-full h-8 mt-1 rounded-md border border-input bg-background px-3 py-1 text-sm font-bold"
+                    >
+                      <option value="" disabled>Select a service</option>
+                      {serviceCategories.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                    </select>
+                  ) : (
+                    <p className="font-bold text-sm capitalize">{user?.service || "Not provided"}</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center text-primary">
+                  <Briefcase className="w-5 h-5" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase">Experience</p>
+                  {isEditing ? (
+                    <Input value={experience} onChange={(e) => setExperience(e.target.value)} className="h-8 mt-1 font-bold" placeholder="e.g. 5 Years" />
+                  ) : (
+                    <p className="font-bold text-sm">{user?.experience || "Not provided"}</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center text-primary">
+                  <IndianRupee className="w-5 h-5" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase">Hourly Rate (₹)</p>
+                  {isEditing ? (
+                    <Input type="number" value={hourlyRate} onChange={(e) => setHourlyRate(e.target.value)} className="h-8 mt-1 font-bold" placeholder="e.g. 500" />
+                  ) : (
+                    <p className="font-bold text-sm">{user?.hourlyRate ? `₹${user.hourlyRate}/hr` : "Not set"}</p>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
-
           {/* Skills Section */}
           <div className="bg-card p-5 rounded-2xl border border-border space-y-4">
              <h3 className="font-black text-sm uppercase tracking-widest text-muted-foreground border-b pb-2">My Skills</h3>
              
              {isEditing && (
                <div className="flex gap-2 mb-2">
-                 <Input 
-                   value={newSkill} 
-                   onChange={(e) => setNewSkill(e.target.value)} 
-                   placeholder="Add a skill (e.g. Pipe Repair)" 
-                   className="h-9"
-                   onKeyDown={(e) => e.key === 'Enter' && handleAddSkill()}
-                 />
-                 <Button onClick={handleAddSkill} size="icon" className="h-9 w-9 shrink-0">
+                 <select
+                   value={newSkill}
+                   onChange={(e) => setNewSkill(e.target.value)}
+                   className="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm"
+                 >
+                   <option value="" disabled>Select a skill to add</option>
+                   {commonSkills.map(skill => (
+                     <option key={skill} value={skill} disabled={skills.includes(skill)}>
+                       {skill}
+                     </option>
+                   ))}
+                 </select>
+                 <Button onClick={handleAddSkill} size="icon" className="h-9 w-9 shrink-0" disabled={!newSkill}>
                    <Plus className="w-4 h-4" />
                  </Button>
                </div>
@@ -173,22 +265,33 @@ const WorkerPrivateProfile = () => {
           </div>
         </div>
 
-        {/* Security & Settings */}
-        <div className="bg-card p-5 rounded-2xl border border-border">
-          <Button variant="outline" className="w-full justify-between h-12 rounded-xl mb-3">
-            <div className="flex items-center gap-3">
-              <Shield className="w-5 h-5 text-primary" />
-              <span className="font-bold">Security Settings</span>
-            </div>
-            <ArrowRight className="w-4 h-4 text-muted-foreground" />
-          </Button>
-          <Button variant="outline" className="w-full justify-between h-12 rounded-xl">
-            <div className="flex items-center gap-3">
-              <Calendar className="w-5 h-5 text-primary" />
-              <span className="font-bold">Availability Schedule</span>
-            </div>
-            <ArrowRight className="w-4 h-4 text-muted-foreground" />
-          </Button>
+        {/* Availability Schedule */}
+        <div className="bg-card p-5 rounded-2xl border border-border space-y-4">
+           <h3 className="font-black text-sm uppercase tracking-widest text-muted-foreground border-b pb-2 flex items-center gap-2">
+             <Calendar className="w-4 h-4" /> Availability Schedule
+           </h3>
+           <div className="flex flex-wrap gap-2">
+             {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map(day => {
+               const isAvailable = availability.includes(day);
+               return (
+                 <button
+                   key={day}
+                   disabled={!isEditing}
+                   onClick={() => {
+                     if (isAvailable) setAvailability(availability.filter(d => d !== day));
+                     else setAvailability([...availability, day]);
+                   }}
+                   className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
+                     isAvailable 
+                       ? "bg-primary text-primary-foreground border-primary shadow-md shadow-primary/20" 
+                       : "bg-secondary text-muted-foreground border-transparent hover:bg-secondary/80"
+                   } ${!isEditing && "opacity-80 cursor-not-allowed"}`}
+                 >
+                   {day.slice(0, 3)}
+                 </button>
+               );
+             })}
+           </div>
         </div>
       </div>
     </DashboardLayout>
