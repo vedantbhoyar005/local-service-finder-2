@@ -60,6 +60,7 @@ router.post('/login', async (req, res) => {
       if (role && user.role !== role) {
         return res.status(401).json({ message: `Access denied. Registered as a ${user.role}, not ${role}.` });
       }
+      
 
       res.json({
         id: user._id.toString(),

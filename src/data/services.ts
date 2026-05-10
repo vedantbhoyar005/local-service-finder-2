@@ -28,7 +28,16 @@ export interface Worker {
   city?: string;
 }
 
-// ... (servicePricing stays same)
+export const servicePricing: Record<string, string> = {
+  plumber: "₹300/hr",
+  electrician: "₹400/hr",
+  cleaner: "₹250/hr",
+  painter: "₹350/hr",
+  carpenter: "₹500/hr",
+  mechanic: "₹450/hr",
+  mover: "₹600/hr",
+  gardener: "₹300/hr",
+};
 
 // Map an API worker (User document) to the frontend Worker interface
 export const mapApiWorker = (apiWorker: any): Worker => {
