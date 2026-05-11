@@ -33,7 +33,7 @@ router.post('/signup', async (req, res) => {
       service,
       experience,
       city: city || 'Delhi',
-      status: role === 'worker' ? 'pending' : 'active'
+      status: 'active'
     });
 
     res.status(201).json({
