@@ -29,10 +29,10 @@ router.post('/', protect, async (req, res) => {
     // Update worker's average rating
     const allReviews = await Review.find({ worker: workerId });
     const totalRating = allReviews.reduce((sum, item) => sum + item.rating, 0);
-    const avgRating = totalRating / allReviews.length;
-
+    const avgRating = Math.round((totalRating / allReviews.length) * 10) / 10;
+    
     await User.findByIdAndUpdate(workerId, {
-      rating: avgRating.toFixed(1),
+      rating: avgRating,
       reviewCount: allReviews.length
     });
 

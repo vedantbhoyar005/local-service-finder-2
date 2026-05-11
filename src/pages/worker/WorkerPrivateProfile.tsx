@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { serviceCategories } from "@/data/services";
 import { toast } from "sonner";
+import { formatDistanceToNow } from "date-fns";
 
 const WorkerPrivateProfile = () => {
   const { user, updateUserProfile } = useAuth();
@@ -253,16 +254,27 @@ const WorkerPrivateProfile = () => {
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-1 p-3 bg-secondary/50 rounded-xl">
                 <Star className="w-5 h-5 text-warning mb-1" />
-                <p className="text-lg font-black italic">4.9</p>
-                <p className="text-[10px] font-bold text-muted-foreground uppercase">Global Rating</p>
+                <p className="text-lg font-black italic">{user?.rating || "0.0"}</p>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase">Global Rating ({user?.reviewCount || 0})</p>
               </div>
               <div className="flex flex-col gap-1 p-3 bg-secondary/50 rounded-xl">
                 <CheckCircle2 className="w-5 h-5 text-primary mb-1" />
-                <p className="text-lg font-black italic">342</p>
+                <p className="text-lg font-black italic">{user?.completedJobs || 0}</p>
                 <p className="text-[10px] font-bold text-muted-foreground uppercase">Jobs Completed</p>
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Reviews Section for Worker */}
+        <div className="bg-card p-5 rounded-2xl border border-border space-y-4">
+           <h3 className="font-black text-sm uppercase tracking-widest text-muted-foreground border-b pb-2 flex items-center justify-between">
+             <span>Recent Reviews</span>
+             <span className="text-[10px] bg-secondary px-2 py-0.5 rounded-full">{user?.reviewCount || 0}</span>
+           </h3>
+           <div className="space-y-3">
+             <ReviewsList workerId={user?.id} />
+           </div>
         </div>
 
         {/* Availability Schedule */}
@@ -295,6 +307,56 @@ const WorkerPrivateProfile = () => {
         </div>
       </div>
     </DashboardLayout>
+  );
+};
+
+const ReviewsList = ({ workerId }: { workerId?: string }) => {
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!workerId) return;
+    const fetchReviews = async () => {
+      try {
+        const res = await fetch(`/api/reviews/worker/${workerId}`);
+        if (!res.ok) throw new Error("Failed to fetch reviews");
+        const data = await res.json();
+        setReviews(data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchReviews();
+  }, [workerId]);
+
+  if (isLoading) return <div className="text-center py-4 text-xs text-muted-foreground animate-pulse">Loading reviews...</div>;
+  if (reviews.length === 0) return <div className="text-center py-4 text-xs text-muted-foreground italic">No reviews yet</div>;
+
+  return (
+    <>
+      {reviews.map((r) => (
+        <div key={r._id} className="p-4 rounded-xl bg-secondary/30 border border-border/50">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-bold">
+                {r.user?.name?.charAt(0) || "U"}
+              </div>
+              <span className="text-xs font-bold">{r.user?.name}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Star className="w-3 h-3 fill-warning text-warning" />
+              <span className="text-xs font-black">{r.rating}</span>
+            </div>
+          </div>
+          <p className="text-xs text-foreground/80 line-clamp-3">{r.comment}</p>
+          <p className="text-[10px] text-muted-foreground mt-2 font-medium">
+            {formatDistanceToNow(new Date(r.createdAt), { addSuffix: true })}
+          </p>
+        </div>
+      ))}
+    </>
   );
 };
 

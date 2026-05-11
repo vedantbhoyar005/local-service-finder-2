@@ -88,6 +88,34 @@ router.put('/:id/status', protect, async (req, res) => {
     booking.status = status;
     await booking.save();
 
+    // If completed, increment worker's job count
+    if (status === 'completed') {
+      await User.findByIdAndUpdate(booking.worker, { $inc: { completedJobs: 1 } });
+    }
+
+    // Create notification for the user
+    let notificationTitle = 'Booking Update';
+    let notificationMessage = `Your booking status has been updated to ${status}`;
+
+    if (status === 'confirmed') {
+      notificationTitle = 'Booking Confirmed!';
+      notificationMessage = `The worker has accepted your booking for ${booking.service}.`;
+    } else if (status === 'rejected') {
+      notificationTitle = 'Booking Rejected';
+      notificationMessage = `The worker has declined your booking for ${booking.service}.`;
+    } else if (status === 'completed') {
+      notificationTitle = 'Service Completed!';
+      notificationMessage = `The worker marked your ${booking.service} service as completed. Please leave a review!`;
+    }
+
+    await Notification.create({
+      recipient: booking.user,
+      type: 'booking_update',
+      title: notificationTitle,
+      message: notificationMessage,
+      booking: booking._id,
+    });
+
     res.json(booking);
   } catch (error) {
     res.status(500).json({ message: 'Server error: ' + error.message });
